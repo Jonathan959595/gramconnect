@@ -9,9 +9,9 @@ async function forward(request: NextRequest, context: { params: Promise<{ path: 
   const target = `${baseUrl}/${path.map(encodeURIComponent).join("/")}${request.nextUrl.search}`;
   const headers = new Headers();
   const contentType = request.headers.get("content-type");
-  const adminKey = request.headers.get("x-admin-key");
+  const authorization = request.headers.get("authorization");
   if (contentType) headers.set("content-type", contentType);
-  if (adminKey) headers.set("x-admin-key", adminKey);
+  if (authorization) headers.set("authorization", authorization);
   const response = await fetch(target, { method: request.method, headers, body: request.method === "GET" ? undefined : await request.text(), cache: "no-store" });
   return new Response(await response.arrayBuffer(), { status: response.status, headers: { "content-type": response.headers.get("content-type") || "application/json" } });
 }
