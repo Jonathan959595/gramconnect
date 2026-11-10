@@ -1,0 +1,13 @@
+npm warn ERESOLVE overriding peer dependency
+npm warn While resolving: gramconnect-demo@0.1.0
+npm warn Found: react@18.3.1
+npm warn node_modules/react
+npm warn   react@"^19.3.1" from the root project
+npm warn   2 more (react-dom, next)
+npm warn
+npm warn Could not resolve dependency:
+npm warn peer react@"^18.3.1" from react-dom@18.3.1
+npm warn node_modules/react-dom
+npm warn   react-dom@"^19.3.1" from the root project
+npm warn   1 more (next)
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, open 'C:\Users\jonat\Documents\Codex\2026-11-09\referenced-chatgpt-conversation-this-is-an\node_modules\next\dist\client\components\sequential-router-queue.js.map'
