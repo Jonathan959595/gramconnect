@@ -1,11 +1,19 @@
 import json
 from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
+from app.security import require_admin
 from app.database import as_dict, connection, supabase_client, using_supabase
 from app.schemas import ComplaintCreate, ComplaintUpdate, ResidentCreate
 from app.services.rules import ROUTES, classify_issue, entity_id, priority_for, reference
 
 router = APIRouter(tags=["complaints"])
+
+@router.get("/residents", dependencies=[Depends(require_admin)])
+def list_residents():
+    if using_supabase():
+        return supabase_client().table("residents").select("*").order("created_at", desc=True).execute().data
+    with connection() as db:
+        return [as_dict(row) for row in db.execute("SELECT * FROM residents ORDER BY created_at DESC").fetchall()]
 
 @router.post("/residents", status_code=status.HTTP_201_CREATED)
 def create_resident(payload: ResidentCreate):
@@ -17,7 +25,7 @@ def create_resident(payload: ResidentCreate):
         db.execute("INSERT INTO residents (id, full_name, phone_hint, locality, preferred_language, notification_channels, consent_recorded) VALUES (?, ?, ?, ?, ?, ?, ?)", (resident_id, payload.full_name, payload.phone_hint, payload.locality, payload.preferred_language, json.dumps(payload.notification_channels), int(payload.consent_recorded)))
         return as_dict(db.execute("SELECT * FROM residents WHERE id = ?", (resident_id,)).fetchone())
 
-@router.get("/complaints")
+@router.get("/complaints", dependencies=[Depends(require_admin)])
 def list_complaints():
     if using_supabase():
         return supabase_client().table("complaints").select("*").order("submitted_at", desc=True).execute().data
@@ -39,7 +47,7 @@ def create_complaint(payload: ComplaintCreate):
         db.execute("INSERT INTO complaint_events (complaint_id, actor_name, event_type, event_detail) VALUES (?, 'Rules engine', 'created', ?)", (complaint_id, f"Classified as {category}; queued for human review."))
         return as_dict(db.execute("SELECT * FROM complaints WHERE id = ?", (complaint_id,)).fetchone())
 
-@router.get("/complaints/{complaint_id}/events")
+@router.get("/complaints/{complaint_id}/events", dependencies=[Depends(require_admin)])
 def complaint_events(complaint_id: str):
     if using_supabase():
         return supabase_client().table("complaint_events").select("*").eq("complaint_id", complaint_id).order("created_at").execute().data
@@ -47,7 +55,7 @@ def complaint_events(complaint_id: str):
         rows = db.execute("SELECT * FROM complaint_events WHERE complaint_id = ? ORDER BY created_at", (complaint_id,)).fetchall()
         return [as_dict(row) for row in rows]
 
-@router.patch("/complaints/{complaint_id}")
+@router.patch("/complaints/{complaint_id}", dependencies=[Depends(require_admin)])
 def update_complaint(complaint_id: str, payload: ComplaintUpdate):
     if using_supabase():
         client = supabase_client()

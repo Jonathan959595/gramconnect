@@ -1,19 +1,20 @@
 from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
+from app.security import require_admin
 from app.database import as_dict, connection, supabase_client, using_supabase
 from app.schemas import OutageCreate, OutageUpdate
 from app.services.rules import entity_id, reference
 
 router = APIRouter(tags=["outages"])
 
-@router.get("/outages")
+@router.get("/outages", dependencies=[Depends(require_admin)])
 def list_outages():
     if using_supabase():
         return supabase_client().table("outage_alerts").select("*").order("created_at", desc=True).execute().data
     with connection() as db:
         return [as_dict(row) for row in db.execute("SELECT * FROM outage_alerts ORDER BY created_at DESC").fetchall()]
 
-@router.post("/outages", status_code=status.HTTP_201_CREATED)
+@router.post("/outages", status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_admin)])
 def create_outage(payload: OutageCreate):
     outage_id, outage_ref = entity_id(), reference("OUT")
     if using_supabase():
@@ -23,7 +24,7 @@ def create_outage(payload: OutageCreate):
         db.execute("INSERT INTO outage_alerts (id, reference_id, locality, source, details, status, restoration_estimate) VALUES (?, ?, ?, ?, ?, 'Draft', ?)", (outage_id, outage_ref, payload.locality, payload.source, payload.details, payload.restoration_estimate))
         return as_dict(db.execute("SELECT * FROM outage_alerts WHERE id = ?", (outage_id,)).fetchone())
 
-@router.patch("/outages/{outage_id}")
+@router.patch("/outages/{outage_id}", dependencies=[Depends(require_admin)])
 def update_outage(outage_id: str, payload: OutageUpdate):
     if using_supabase():
         client = supabase_client()
