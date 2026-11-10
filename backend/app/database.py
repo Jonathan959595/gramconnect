@@ -77,6 +77,9 @@ def as_dict(row: sqlite3.Row | None):
 def using_supabase() -> bool:
     return bool(SUPABASE_URL and SUPABASE_SECRET_KEY)
 
+def storage_diagnostics() -> dict[str, str]:
+    return {"storage": "supabase" if using_supabase() else "sqlite", "supabase_url": SUPABASE_URL if using_supabase() else ""}
+
 @lru_cache
 def supabase_client() -> Client:
     if not using_supabase():

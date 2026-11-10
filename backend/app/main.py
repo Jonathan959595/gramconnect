@@ -2,7 +2,7 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import initialise_database
+from app.database import initialise_database, storage_diagnostics
 from app.routers import complaints, outages
 
 @asynccontextmanager
@@ -16,7 +16,7 @@ app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True
 
 @app.get("/health", tags=["system"])
 def health():
-    return {"status": "ok", "service": "gramconnect-backend"}
+    return {"status": "ok", "service": "gramconnect-backend", **storage_diagnostics()}
 
 app.include_router(complaints.router, prefix="/api")
 app.include_router(outages.router, prefix="/api")
