@@ -7,7 +7,11 @@ from supabase import Client, create_client
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 DATABASE_PATH = Path(os.getenv("DATABASE_PATH", BASE_DIR / "data" / "gramconnect.db"))
-SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
+# The dashboard's Data API panel may show a URL ending in /rest/v1. The Python
+# client expects the project origin and appends its REST path itself.
+if SUPABASE_URL.endswith("/rest/v1"):
+    SUPABASE_URL = SUPABASE_URL[:-8]
 SUPABASE_SECRET_KEY = os.getenv("SUPABASE_SECRET_KEY")
 
 SCHEMA = """
