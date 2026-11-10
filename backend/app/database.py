@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import httpx
 from contextlib import contextmanager
 from functools import lru_cache
 from pathlib import Path
@@ -85,3 +86,10 @@ def supabase_client() -> Client:
     if not using_supabase():
         raise RuntimeError("Supabase is not configured")
     return create_client(SUPABASE_URL, SUPABASE_SECRET_KEY)
+
+def supabase_rest(method: str, table: str, *, params: dict | None = None, payload: dict | None = None) -> list[dict]:
+    if not using_supabase():
+        raise RuntimeError("Supabase is not configured")
+    response = httpx.request(method, f"{SUPABASE_URL}/rest/v1/{table}", params=params, json=payload, headers={"apikey": SUPABASE_SECRET_KEY, "Authorization": f"Bearer {SUPABASE_SECRET_KEY}", "Content-Type": "application/json", "Prefer": "return=representation"}, timeout=20)
+    response.raise_for_status()
+    return response.json() if response.content else []
