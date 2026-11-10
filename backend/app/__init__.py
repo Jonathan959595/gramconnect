@@ -1,0 +1,1 @@
+"""GRAMCONNECT backend application package."""

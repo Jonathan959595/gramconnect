@@ -1,8 +1,8 @@
-# GRAMCONNECT — Village Civic Assistance Workspace
+# GRAMCONNECT frontend
 
-GRAMCONNECT is a full workflow prototype for village civic assistance. It demonstrates private WhatsApp-style resident conversation, Telugu/English issue capture, deterministic complaint intelligence, administrator case management, dispatch/audit controls, electricity-outage verification, consent-aware notification workflow, and operational analytics.
+This folder contains the Next.js web interface for residents and administrators. The accompanying API, data layer, business rules, and integration boundaries are in `../backend`.
 
-## What works now
+## What this interface demonstrates
 
 - Private resident reporting with structured landmark follow-up.
 - Deterministic Telugu/English classification for drainage, electricity, water, roads, streetlights and sanitation.
@@ -12,7 +12,7 @@ GRAMCONNECT is a full workflow prototype for village civic assistance. It demons
 - Resident communication preferences and consent controls.
 - Dashboard and analytics that recalculate from the browser-local dataset.
 
-## Honest operating mode
+## Current operating mode
 
 The app starts in **simulation mode**. All seeded residents, contact fragments, cases, alerts, and metrics are fictional. New records are stored only in the present browser using local storage. The app does not contact residents, WhatsApp, Spandana/PGRS, DISCOMs, or official systems.
 
@@ -25,11 +25,18 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`. Use **Reset sample data** to restart a demonstration.
+Open `http://localhost:3000`. Use **Reset sample data** to restart a demonstration. Start the backend separately on port 8000 when demonstrating the documented API.
 
 ```powershell
 npm run test
 ```
+
+## Evaluator navigation
+
+- `app/page.tsx` — main resident and administrator workspace screens.
+- `app/globals.css` — responsive visual system.
+- `app/api/health/route.ts` — frontend health endpoint.
+- `tests/` — frontend checks.
 
 ## Suggested evaluator demo (5 minutes)
 
@@ -47,7 +54,7 @@ npm run test
 3. Use build command `npm run build`.
 4. No environment variables are needed for the current simulation build.
 
-For production, replace browser-local storage with Vercel Postgres, Neon, or Supabase and add server-side endpoints. Do not expose credentials in the browser, repository, terminal output, or chat.
+For production, configure `NEXT_PUBLIC_API_BASE_URL` with the deployed backend API URL. Do not expose credentials in the browser, repository, terminal output, or chat.
 
 ## Required before collecting real data
 
