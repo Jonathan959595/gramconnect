@@ -19,7 +19,7 @@ def list_residents():
 def create_resident(payload: ResidentCreate):
     resident_id = entity_id()
     if using_supabase():
-        data = {"id": resident_id, "full_name": payload.full_name, "phone_hint": payload.phone_hint, "locality": payload.locality, "preferred_language": payload.preferred_language, "notification_channels": payload.notification_channels, "consent_recorded": payload.consent_recorded}
+        data = {"id": resident_id, "full_name": payload.full_name, "phone_e164": payload.phone_hint, "locality": payload.locality, "preferred_language": payload.preferred_language, "notification_channels": payload.notification_channels, "consent_recorded": payload.consent_recorded}
         return supabase_client().table("residents").insert(data).execute().data[0]
     with connection() as db:
         db.execute("INSERT INTO residents (id, full_name, phone_hint, locality, preferred_language, notification_channels, consent_recorded) VALUES (?, ?, ?, ?, ?, ?, ?)", (resident_id, payload.full_name, payload.phone_hint, payload.locality, payload.preferred_language, json.dumps(payload.notification_channels), int(payload.consent_recorded)))
