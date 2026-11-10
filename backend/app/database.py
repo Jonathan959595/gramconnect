@@ -1,10 +1,14 @@
 import os
 import sqlite3
 from contextlib import contextmanager
+from functools import lru_cache
 from pathlib import Path
+from supabase import Client, create_client
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 DATABASE_PATH = Path(os.getenv("DATABASE_PATH", BASE_DIR / "data" / "gramconnect.db"))
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_SECRET_KEY = os.getenv("SUPABASE_SECRET_KEY")
 
 SCHEMA = """
 PRAGMA foreign_keys = ON;
@@ -43,6 +47,8 @@ CREATE TABLE IF NOT EXISTS notification_deliveries (
 """
 
 def initialise_database() -> None:
+    if using_supabase():
+        return
     DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(DATABASE_PATH) as connection:
         connection.executescript(SCHEMA)
@@ -63,3 +69,12 @@ def connection():
 
 def as_dict(row: sqlite3.Row | None):
     return dict(row) if row else None
+
+def using_supabase() -> bool:
+    return bool(SUPABASE_URL and SUPABASE_SECRET_KEY)
+
+@lru_cache
+def supabase_client() -> Client:
+    if not using_supabase():
+        raise RuntimeError("Supabase is not configured")
+    return create_client(SUPABASE_URL, SUPABASE_SECRET_KEY)

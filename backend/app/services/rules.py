@@ -25,3 +25,6 @@ def priority_for(category: str) -> str:
 
 def reference(prefix: str) -> str:
     return f"{prefix}-{uuid4().hex[:8].upper()}"
+
+def entity_id() -> str:
+    return str(uuid4())
